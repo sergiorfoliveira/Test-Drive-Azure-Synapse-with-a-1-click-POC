@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "93564d3e-d9e8-4bd0-a7c4-d41f231ee94b"
+				"spark.autotune.trackingId": "cc903ad3-a971-4367-a593-f95214451acc"
 			}
 		},
 		"metadata": {
@@ -444,6 +444,61 @@
 					"spark.sql(\"select min(timestamp) from trainfeatures where building_id = '1258' \" ).show()"
 				],
 				"execution_count": 23
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from scipy import signal"
+				],
+				"execution_count": 24
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"f, Pxx_den = signal.welch(meter1.loc[:,'meter_reading'], 2, nperseg=1024) "
+				],
+				"execution_count": 32
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"pyplot.semilogy(f, Pxx_den)\r\n",
+					"pyplot.show()"
+				],
+				"execution_count": 33
 			}
 		]
 	}
