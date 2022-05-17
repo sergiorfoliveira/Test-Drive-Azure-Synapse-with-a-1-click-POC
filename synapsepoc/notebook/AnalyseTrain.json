@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "d4f4a24b-6855-436d-a69a-e7e169249228"
+				"spark.autotune.trackingId": "b8b8d0e0-c671-4fa0-bb77-f80891dba133"
 			}
 		},
 		"metadata": {
@@ -57,10 +57,10 @@
 				},
 				"source": [
 					"%%pyspark\n",
-					"df = spark.sql(\"SELECT * FROM `default`.`train`\")\n",
+					"df = spark.sql(\"SELECT * FROM `default`.`trainfeatures`\")\n",
 					"# df.show(10)"
 				],
-				"execution_count": 1
+				"execution_count": 9
 			},
 			{
 				"cell_type": "code",
@@ -94,9 +94,9 @@
 					}
 				},
 				"source": [
-					"df.createOrReplaceTempView(\"train\")"
+					"df.createOrReplaceTempView(\"trainfeatures\")"
 				],
-				"execution_count": 6
+				"execution_count": 10
 			},
 			{
 				"cell_type": "code",
@@ -112,9 +112,9 @@
 					}
 				},
 				"source": [
-					"spark.sql(\"select * from train\").show()"
+					"spark.sql(\"select * from trainfeatures\").show()"
 				],
-				"execution_count": 8
+				"execution_count": 11
 			},
 			{
 				"cell_type": "code",
@@ -169,7 +169,7 @@
 					"from pyspark.sql.functions import *\r\n",
 					"df=df.withColumn(\"timestamp\",to_timestamp(\"timestamp\"))"
 				],
-				"execution_count": 16
+				"execution_count": 12
 			},
 			{
 				"cell_type": "code",
@@ -187,7 +187,7 @@
 				"source": [
 					"df.describe()"
 				],
-				"execution_count": 17
+				"execution_count": 7
 			},
 			{
 				"cell_type": "code",
@@ -277,7 +277,7 @@
 				"source": [
 					"spark.sql(\"select building_id, sum(anomaly) from train group by building_id order by 2 desc\").show()"
 				],
-				"execution_count": 28
+				"execution_count": 8
 			},
 			{
 				"cell_type": "code",
@@ -312,10 +312,46 @@
 				},
 				"source": [
 					"from matplotlib import pyplot\r\n",
-					"meter1 = spark.sql(\"select timestamp, meter_reading from train where building_id like '%1' and meter_reading is not null order by timestamp\")\r\n",
-					"meter1=meter1.withColumn(\"meter_reading\",col(\"meter_reading\").cast('double'))"
+					"meter1 = spark.sql(\"select timestamp, hour, month, weekday, wind_speed, wind_direction, air_temperature, dew_temperature, is_holiday, meter_reading, anomaly from trainfeatures where building_id like '%1258' and meter_reading is not null order by timestamp\")\r\n",
+					""
 				],
-				"execution_count": 42
+				"execution_count": 16
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"meter1=meter1.withColumn(\"meter_reading\",col(\"meter_reading\").cast('float'))"
+				],
+				"execution_count": 17
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"meter1=meter1.withColumn(\"timestamp\",col(\"timestamp\").cast('timestamp'))"
+				],
+				"execution_count": 19
 			},
 			{
 				"cell_type": "code",
@@ -333,7 +369,7 @@
 				"source": [
 					"meter1.printSchema()"
 				],
-				"execution_count": 44
+				"execution_count": 20
 			},
 			{
 				"cell_type": "code",
@@ -353,7 +389,7 @@
 					"import pandas as pd\r\n",
 					"meter1=meter1.toPandas()"
 				],
-				"execution_count": 45
+				"execution_count": 21
 			},
 			{
 				"cell_type": "code",
@@ -371,7 +407,7 @@
 				"source": [
 					"meter1.describe()"
 				],
-				"execution_count": 47
+				"execution_count": 22
 			},
 			{
 				"cell_type": "code",
@@ -390,6 +426,24 @@
 					"pyplot.show()"
 				],
 				"execution_count": 51
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"spark.sql(\"select min(timestamp) from trainfeatures where building_id = '1258' \" ).show()"
+				],
+				"execution_count": 14
 			}
 		]
 	}
