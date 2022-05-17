@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "b8b8d0e0-c671-4fa0-bb77-f80891dba133"
+				"spark.autotune.trackingId": "93564d3e-d9e8-4bd0-a7c4-d41f231ee94b"
 			}
 		},
 		"metadata": {
@@ -443,7 +443,7 @@
 				"source": [
 					"spark.sql(\"select min(timestamp) from trainfeatures where building_id = '1258' \" ).show()"
 				],
-				"execution_count": 14
+				"execution_count": 23
 			}
 		]
 	}
