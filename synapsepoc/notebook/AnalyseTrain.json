@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "cc903ad3-a971-4367-a593-f95214451acc"
+				"spark.autotune.trackingId": "e25f98c0-e038-482b-8368-583d70691f39"
 			}
 		},
 		"metadata": {
@@ -477,9 +477,9 @@
 					}
 				},
 				"source": [
-					"f, Pxx_den = signal.welch(meter1.loc[:,'meter_reading'], 2, nperseg=1024) "
+					"f, Pxx_den = signal.welch(meter1.loc[:,'meter_reading'], 2) "
 				],
-				"execution_count": 32
+				"execution_count": 38
 			},
 			{
 				"cell_type": "code",
@@ -498,7 +498,7 @@
 					"pyplot.semilogy(f, Pxx_den)\r\n",
 					"pyplot.show()"
 				],
-				"execution_count": 33
+				"execution_count": 39
 			}
 		]
 	}
