@@ -1,0 +1,20 @@
+{
+	"name": "Spark1",
+	"type": "Microsoft.Synapse/workspaces/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "Spark",
+		"typeProperties": {
+			"host": " ws1sparkpool1",
+			"port": 443,
+			"authenticationType": "UsernameAndPassword",
+			"username": "sergio.oliveira@lanlink.com.br",
+			"enableSsl": false,
+			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIlNZTkFQU0VANDEyNTY3MzQtRTBCNS00NzVGLUJEMEItM0E1MTI2REY4OUQwX2Q5ODQwMTEwLWNhMjQtNDg1Yi04ZWM4LTY0OWIzYjAyOTI0OSINCn0="
+		},
+		"connectVia": {
+			"referenceName": "AutoResolveIntegrationRuntime",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
