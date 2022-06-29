@@ -1049,6 +1049,28 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/AzureDatabricks1')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricks",
+				"typeProperties": {
+					"domain": "https://adb-2080334085598083.3.azuredatabricks.net",
+					"authentication": "MSI",
+					"workspaceResourceId": "/subscriptions/241719b7-f326-42c8-87a0-fb0182d3a3c7/resourceGroups/rgllkdatabricks/providers/Microsoft.Databricks/workspaces/wsnewdatabricks",
+					"existingClusterId": "0518-191436-v0j1bjtf"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/HttpServerTripDataLinkedService')]",
 			"type": "Microsoft.Synapse/workspaces/linkedServices",
 			"apiVersion": "2019-06-01-preview",
@@ -1319,7 +1341,7 @@
 							"name": "InnerJoinWithTripFares"
 						}
 					],
-					"script": "source(output(\n\t\tmedallion as string,\n\t\thack_license as string,\n\t\tvendor_id as string,\n\t\trate_code as string,\n\t\tstore_and_fwd_flag as string,\n\t\tpickup_datetime as string,\n\t\tdropoff_datetime as string,\n\t\tpassenger_count as string,\n\t\ttrip_time_in_secs as string,\n\t\ttrip_distance as string,\n\t\tpickup_longitude as string,\n\t\tpickup_latitude as string,\n\t\tdropoff_longitude as string,\n\t\tdropoff_latitude as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinferDriftedColumnTypes: true,\n\tignoreNoFilesFound: false) ~> TripDataCSV\nsource(output(\n\t\tmedallion as string,\n\t\thack_license as string,\n\t\tvendor_id as string,\n\t\tpickup_datetime as string,\n\t\tpayment_type as string,\n\t\tfare_amount as string,\n\t\tsurcharge as string,\n\t\tmta_tax as string,\n\t\ttip_amount as string,\n\t\ttolls_amount as string,\n\t\ttotal_amount as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinferDriftedColumnTypes: true,\n\tignoreNoFilesFound: false) ~> FaresDataCSV\nInnerJoinWithTripFares aggregate(groupBy(payment_type),\n\taverage_fare = avg(toInteger(total_amount)),\n\t\ttotal_trip_distance = sum(toInteger(trip_distance))) ~> AggregateByPaymentType\nTripDataCSV, FaresDataCSV join(TripDataCSV@medallion == FaresDataCSV@medallion\n\t&& TripDataCSV@hack_license == FaresDataCSV@hack_license\n\t&& TripDataCSV@vendor_id == FaresDataCSV@vendor_id\n\t&& TripDataCSV@pickup_datetime == FaresDataCSV@pickup_datetime,\n\tjoinType:'inner',\n\tbroadcast: 'auto')~> InnerJoinWithTripFares\nAggregateByPaymentType sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\trecreate:true,\n\tformat: 'table',\n\tstaged: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> SynapseAnalyticsSink"
+					"script": "source(output(\n\t\tmedallion as string,\n\t\thack_license as string,\n\t\tvendor_id as string,\n\t\trate_code as string,\n\t\tstore_and_fwd_flag as string,\n\t\tpickup_datetime as string,\n\t\tdropoff_datetime as string,\n\t\tpassenger_count as string,\n\t\ttrip_time_in_secs as string,\n\t\ttrip_distance as string,\n\t\tpickup_longitude as string,\n\t\tpickup_latitude as string,\n\t\tdropoff_longitude as string,\n\t\tdropoff_latitude as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinferDriftedColumnTypes: true,\n\tignoreNoFilesFound: false) ~> TripDataCSV\nsource(output(\n\t\tmedallion as string,\n\t\thack_license as string,\n\t\tvendor_id as string,\n\t\tpickup_datetime as string,\n\t\tpayment_type as string,\n\t\tfare_amount as string,\n\t\tsurcharge as string,\n\t\tmta_tax as string,\n\t\ttip_amount as string,\n\t\ttolls_amount as string,\n\t\ttotal_amount as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinferDriftedColumnTypes: true,\n\tignoreNoFilesFound: false) ~> FaresDataCSV\nInnerJoinWithTripFares aggregate(groupBy(payment_type),\n\taverage_fare = avg(toInteger(total_amount)),\n\t\ttotal_trip_distance = sum(toInteger(trip_distance))) ~> AggregateByPaymentType\nTripDataCSV, FaresDataCSV join(TripDataCSV@medallion == FaresDataCSV@medallion\n\t&& TripDataCSV@hack_license == FaresDataCSV@hack_license\n\t&& TripDataCSV@vendor_id == FaresDataCSV@vendor_id\n\t&& TripDataCSV@pickup_datetime == FaresDataCSV@pickup_datetime,\n\tjoinType:'inner',\n\tmatchType:'exact',\n\tignoreSpaces: false,\n\tbroadcast: 'auto')~> InnerJoinWithTripFares\nAggregateByPaymentType sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\trecreate:true,\n\tformat: 'table',\n\tstaged: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> SynapseAnalyticsSink"
 				}
 			},
 			"dependsOn": [
@@ -1329,12 +1351,64 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/Credential1')]",
+			"type": "Microsoft.Synapse/workspaces/credentials",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "ManagedIdentity",
+				"typeProperties": {
+					"resourceId": "/subscriptions/241719b7-f326-42c8-87a0-fb0182d3a3c7/resourceGroups/testspark/providers/Microsoft.ManagedIdentity/userAssignedIdentities/llkmanagedidentity01"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/WorkspaceSystemIdentity')]",
 			"type": "Microsoft.Synapse/workspaces/credentials",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"type": "ManagedIdentity",
 				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script 1')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "default",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script 2')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "select * from LakeDatabase1.BusinessMetric",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "default",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
 			},
 			"dependsOn": []
 		},
@@ -2208,6 +2282,886 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/LakeDatabase1')]",
+			"type": "Microsoft.Synapse/workspaces/databases",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"Ddls": [
+					{
+						"ActionType": "CREATE",
+						"OldEntity": null,
+						"NewEntity": {
+							"Name": "LakeDatabase1",
+							"EntityType": "DATABASE",
+							"Origin": {
+								"Type": "SPARK"
+							},
+							"Properties": {
+								"IsSyMSCDMDatabase": true,
+								"DerivedModelDBInfo": "{\"ModelDirectives\":{\"BaseModel\":{\"Name\":\"Retail\",\"Version\":\"0.1.0\"}}}"
+							},
+							"Source": {
+								"Provider": "ADLS",
+								"Location": "abfss://dlsfffpocfs1@fffxjv3mboryscbgpoc.dfs.core.windows.net/LakeDatabase1",
+								"Properties": {
+									"FormatType": "parquet",
+									"LinkedServiceName": "fffxjv3mboryscbgpocws1-WorkspaceDefaultStorage"
+								}
+							}
+						},
+						"Source": {
+							"Type": "SPARK"
+						}
+					},
+					{
+						"ActionType": "CREATE",
+						"OldEntity": null,
+						"NewEntity": {
+							"Name": "BusinessMetric",
+							"EntityType": "TABLE",
+							"Namespace": {
+								"DatabaseName": "LakeDatabase1"
+							},
+							"Description": "A financial or performance metric or measurement that provides information about the performance or financial status of the organization, corporation or business unit.",
+							"TableType": "EXTERNAL",
+							"Origin": {
+								"Type": "SPARK"
+							},
+							"StorageDescriptor": {
+								"Columns": [
+									{
+										"Name": "BusinessMetricId",
+										"Description": "The unique identifier of a business metric.",
+										"OriginDataTypeName": {
+											"TypeName": "integer",
+											"IsComplexType": false,
+											"IsNullable": false,
+											"Properties": {
+												"HIVE_TYPE_STRING": "integer"
+											}
+										},
+										"BaseAttributeReference": {
+											"Entity": "BusinessMetric.cdm.json/BusinessMetric",
+											"Name": "BusinessMetricId"
+										}
+									},
+									{
+										"Name": "BusinessMetricName",
+										"Description": "The name of a Business Metric.",
+										"OriginDataTypeName": {
+											"TypeName": "string",
+											"IsComplexType": false,
+											"IsNullable": true,
+											"Length": 128,
+											"Properties": {
+												"HIVE_TYPE_STRING": "string"
+											}
+										},
+										"BaseAttributeReference": {
+											"Entity": "BusinessMetric.cdm.json/BusinessMetric",
+											"Name": "BusinessMetricName"
+										}
+									},
+									{
+										"Name": "BusinessMetricDescription",
+										"Description": "The description of a Business Metric.",
+										"OriginDataTypeName": {
+											"TypeName": "string",
+											"IsComplexType": false,
+											"IsNullable": true,
+											"Length": 512,
+											"Properties": {
+												"HIVE_TYPE_STRING": "string"
+											}
+										},
+										"BaseAttributeReference": {
+											"Entity": "BusinessMetric.cdm.json/BusinessMetric",
+											"Name": "BusinessMetricDescription"
+										}
+									},
+									{
+										"Name": "BusinessMetricAlgorithm",
+										"Description": "The algorithm used to calculate a Business Metric.",
+										"OriginDataTypeName": {
+											"TypeName": "string",
+											"IsComplexType": false,
+											"IsNullable": true,
+											"Length": 1024,
+											"Properties": {
+												"HIVE_TYPE_STRING": "string"
+											}
+										},
+										"BaseAttributeReference": {
+											"Entity": "BusinessMetric.cdm.json/BusinessMetric",
+											"Name": "BusinessMetricAlgorithm"
+										}
+									},
+									{
+										"Name": "BusinessMetricTypeId",
+										"Description": "The unique identifier of a Business Metric Type.",
+										"OriginDataTypeName": {
+											"TypeName": "integer",
+											"IsComplexType": false,
+											"IsNullable": true,
+											"Properties": {
+												"HIVE_TYPE_STRING": "integer"
+											}
+										},
+										"BaseAttributeReference": {
+											"Entity": "BusinessMetric.cdm.json/BusinessMetric",
+											"Name": "BusinessMetricTypeId"
+										}
+									},
+									{
+										"Name": "KeyPerformanceIndicator",
+										"Description": "Indicates whether the metric is always considered to be a key performance indicator.",
+										"OriginDataTypeName": {
+											"TypeName": "string",
+											"IsComplexType": false,
+											"IsNullable": true,
+											"Length": 1024,
+											"Properties": {
+												"HIVE_TYPE_STRING": "string"
+											}
+										},
+										"BaseAttributeReference": {
+											"Entity": "BusinessMetric.cdm.json/BusinessMetric",
+											"Name": "KeyPerformanceIndicator"
+										}
+									}
+								],
+								"Format": {
+									"InputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+									"OutputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+									"FormatType": "parquet",
+									"SerializeLib": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+									"Properties": {
+										"path": "abfss://dlsfffpocfs1@fffxjv3mboryscbgpoc.dfs.core.windows.net/LakeDatabase1/BusinessMetric",
+										"FormatTypeSetToDatabaseDefault": true
+									}
+								},
+								"Source": {
+									"Provider": "ADLS",
+									"Location": "abfss://dlsfffpocfs1@fffxjv3mboryscbgpoc.dfs.core.windows.net/LakeDatabase1/BusinessMetric",
+									"Properties": {
+										"LinkedServiceName": "fffxjv3mboryscbgpocws1-WorkspaceDefaultStorage",
+										"LocationSetToDatabaseDefault": true
+									}
+								},
+								"Properties": {
+									"textinputformat.record.delimiter": ",",
+									"compression": "{\"type\":\"None\",\"level\":\"optimal\"}",
+									"derivedModelAttributeInfo": "{\"attributeReferences\":{\"BusinessMetricId\":{\"entity\":\"BusinessMetric.cdm.json/BusinessMetric\",\"name\":\"BusinessMetricId\"},\"BusinessMetricName\":{\"entity\":\"BusinessMetric.cdm.json/BusinessMetric\",\"name\":\"BusinessMetricName\"},\"BusinessMetricDescription\":{\"entity\":\"BusinessMetric.cdm.json/BusinessMetric\",\"name\":\"BusinessMetricDescription\"},\"BusinessMetricAlgorithm\":{\"entity\":\"BusinessMetric.cdm.json/BusinessMetric\",\"name\":\"BusinessMetricAlgorithm\"},\"BusinessMetricTypeId\":{\"entity\":\"BusinessMetric.cdm.json/BusinessMetric\",\"name\":\"BusinessMetricTypeId\"},\"KeyPerformanceIndicator\":{\"entity\":\"BusinessMetric.cdm.json/BusinessMetric\",\"name\":\"KeyPerformanceIndicator\"}}}"
+								},
+								"Compressed": false,
+								"IsStoredAsSubdirectories": false
+							},
+							"Properties": {
+								"DerivedModelEntityInfo": "{\"entityDirectives\":{\"baseEntityReference\":{\"name\":\"BusinessMetric\",\"path\":\"BusinessMetric.cdm.json/BusinessMetric\"},\"description\":\"A financial or performance metric or measurement that provides information about the performance or financial status of the organization, corporation or business unit.\",\"primaryKey\":[\"BusinessMetricId\"],\"projectionInfo\":{\"attributes\":[{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"BusinessMetric.cdm.json/BusinessMetric\",\"name\":\"BusinessMetricId\"},\"dataType\":\"integer\",\"description\":\"The unique identifier of a business metric.\",\"isNullable\":false,\"name\":\"BusinessMetricId\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"BusinessMetric.cdm.json/BusinessMetric\",\"name\":\"BusinessMetricName\"},\"dataType\":\"string\",\"dataTypeLength\":128,\"description\":\"The name of a Business Metric.\",\"isNullable\":true,\"name\":\"BusinessMetricName\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"BusinessMetric.cdm.json/BusinessMetric\",\"name\":\"BusinessMetricDescription\"},\"dataType\":\"string\",\"dataTypeLength\":512,\"description\":\"The description of a Business Metric.\",\"isNullable\":true,\"name\":\"BusinessMetricDescription\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"BusinessMetric.cdm.json/BusinessMetric\",\"name\":\"BusinessMetricAlgorithm\"},\"dataType\":\"string\",\"dataTypeLength\":1024,\"description\":\"The algorithm used to calculate a Business Metric.\",\"isNullable\":true,\"name\":\"BusinessMetricAlgorithm\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"BusinessMetric.cdm.json/BusinessMetric\",\"name\":\"BusinessMetricTypeId\"},\"dataType\":\"integer\",\"description\":\"The unique identifier of a Business Metric Type.\",\"isNullable\":true,\"name\":\"BusinessMetricTypeId\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"BusinessMetric.cdm.json/BusinessMetric\",\"name\":\"KeyPerformanceIndicator\"},\"dataType\":\"string\",\"dataTypeLength\":1024,\"description\":\"Indicates whether the metric is always considered to be a key performance indicator.\",\"isNullable\":true,\"name\":\"KeyPerformanceIndicator\"}]}}}",
+								"Description": "A financial or performance metric or measurement that provides information about the performance or financial status of the organization, corporation or business unit.",
+								"DisplayFolderInfo": "{\"name\":\"Business Metrics\",\"colorCode\":\"#00A2AD\"}",
+								"PrimaryKeys": "BusinessMetricId",
+								"spark.sql.sources.provider": "parquet"
+							},
+							"Retention": 0,
+							"Temporary": false,
+							"IsRewriteEnabled": false
+						},
+						"Source": {
+							"Type": "SPARK"
+						}
+					},
+					{
+						"ActionType": "CREATE",
+						"OldEntity": null,
+						"NewEntity": {
+							"Name": "BusinessMetricType",
+							"EntityType": "TABLE",
+							"Namespace": {
+								"DatabaseName": "LakeDatabase1"
+							},
+							"Description": "Business ratios are categorized into 6 categories:\n\n- Sales Ratios\n- Profit Ratios\n- Debt & Capital Ratios\n- Efficiency Ratios\n- Marketing Ratios\n- Investment Ratios",
+							"TableType": "EXTERNAL",
+							"Origin": {
+								"Type": "SPARK"
+							},
+							"StorageDescriptor": {
+								"Columns": [
+									{
+										"Name": "BusinessMetricTypeId",
+										"Description": "The unique identifier of a Business Metric Type.",
+										"OriginDataTypeName": {
+											"TypeName": "integer",
+											"IsComplexType": false,
+											"IsNullable": false,
+											"Properties": {
+												"HIVE_TYPE_STRING": "integer"
+											}
+										},
+										"BaseAttributeReference": {
+											"Entity": "BusinessMetricType.cdm.json/BusinessMetricType",
+											"Name": "BusinessMetricTypeId"
+										}
+									},
+									{
+										"Name": "BusinessMetricTypeName",
+										"Description": "The name of a Business Metric Type.",
+										"OriginDataTypeName": {
+											"TypeName": "string",
+											"IsComplexType": false,
+											"IsNullable": true,
+											"Length": 128,
+											"Properties": {
+												"HIVE_TYPE_STRING": "string"
+											}
+										},
+										"BaseAttributeReference": {
+											"Entity": "BusinessMetricType.cdm.json/BusinessMetricType",
+											"Name": "BusinessMetricTypeName"
+										}
+									},
+									{
+										"Name": "BusinessMetricTypeDescription",
+										"Description": "The description of a Business Metric Type.",
+										"OriginDataTypeName": {
+											"TypeName": "string",
+											"IsComplexType": false,
+											"IsNullable": true,
+											"Length": 512,
+											"Properties": {
+												"HIVE_TYPE_STRING": "string"
+											}
+										},
+										"BaseAttributeReference": {
+											"Entity": "BusinessMetricType.cdm.json/BusinessMetricType",
+											"Name": "BusinessMetricTypeDescription"
+										}
+									}
+								],
+								"Format": {
+									"InputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+									"OutputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+									"FormatType": "parquet",
+									"SerializeLib": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+									"Properties": {
+										"path": "abfss://dlsfffpocfs1@fffxjv3mboryscbgpoc.dfs.core.windows.net/LakeDatabase1/BusinessMetricType",
+										"FormatTypeSetToDatabaseDefault": true
+									}
+								},
+								"Source": {
+									"Provider": "ADLS",
+									"Location": "abfss://dlsfffpocfs1@fffxjv3mboryscbgpoc.dfs.core.windows.net/LakeDatabase1/BusinessMetricType",
+									"Properties": {
+										"LinkedServiceName": "fffxjv3mboryscbgpocws1-WorkspaceDefaultStorage",
+										"LocationSetToDatabaseDefault": true
+									}
+								},
+								"Properties": {
+									"textinputformat.record.delimiter": ",",
+									"compression": "{\"type\":\"None\",\"level\":\"optimal\"}",
+									"derivedModelAttributeInfo": "{\"attributeReferences\":{\"BusinessMetricTypeId\":{\"entity\":\"BusinessMetricType.cdm.json/BusinessMetricType\",\"name\":\"BusinessMetricTypeId\"},\"BusinessMetricTypeName\":{\"entity\":\"BusinessMetricType.cdm.json/BusinessMetricType\",\"name\":\"BusinessMetricTypeName\"},\"BusinessMetricTypeDescription\":{\"entity\":\"BusinessMetricType.cdm.json/BusinessMetricType\",\"name\":\"BusinessMetricTypeDescription\"}}}"
+								},
+								"Compressed": false,
+								"IsStoredAsSubdirectories": false
+							},
+							"Properties": {
+								"DerivedModelEntityInfo": "{\"entityDirectives\":{\"baseEntityReference\":{\"name\":\"BusinessMetricType\",\"path\":\"BusinessMetricType.cdm.json/BusinessMetricType\"},\"description\":\"Business ratios are categorized into 6 categories:\\n\\n- Sales Ratios\\n- Profit Ratios\\n- Debt & Capital Ratios\\n- Efficiency Ratios\\n- Marketing Ratios\\n- Investment Ratios\",\"primaryKey\":[\"BusinessMetricTypeId\"],\"projectionInfo\":{\"attributes\":[{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"BusinessMetricType.cdm.json/BusinessMetricType\",\"name\":\"BusinessMetricTypeId\"},\"dataType\":\"integer\",\"description\":\"The unique identifier of a Business Metric Type.\",\"isNullable\":false,\"name\":\"BusinessMetricTypeId\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"BusinessMetricType.cdm.json/BusinessMetricType\",\"name\":\"BusinessMetricTypeName\"},\"dataType\":\"string\",\"dataTypeLength\":128,\"description\":\"The name of a Business Metric Type.\",\"isNullable\":true,\"name\":\"BusinessMetricTypeName\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"BusinessMetricType.cdm.json/BusinessMetricType\",\"name\":\"BusinessMetricTypeDescription\"},\"dataType\":\"string\",\"dataTypeLength\":512,\"description\":\"The description of a Business Metric Type.\",\"isNullable\":true,\"name\":\"BusinessMetricTypeDescription\"}]}}}",
+								"Description": "Business ratios are categorized into 6 categories:\n\n- Sales Ratios\n- Profit Ratios\n- Debt & Capital Ratios\n- Efficiency Ratios\n- Marketing Ratios\n- Investment Ratios",
+								"DisplayFolderInfo": "{\"name\":\"Business Metrics\",\"colorCode\":\"#00A2AD\"}",
+								"PrimaryKeys": "BusinessMetricTypeId",
+								"spark.sql.sources.provider": "parquet"
+							},
+							"Retention": 0,
+							"Temporary": false,
+							"IsRewriteEnabled": false
+						},
+						"Source": {
+							"Type": "SPARK"
+						}
+					},
+					{
+						"ActionType": "CREATE",
+						"OldEntity": null,
+						"NewEntity": {
+							"Name": "LegalEntityBusinessMetric",
+							"EntityType": "TABLE",
+							"Namespace": {
+								"DatabaseName": "LakeDatabase1"
+							},
+							"Description": "The associated Business Metric reported by the Legal Entity for the indicated period.",
+							"TableType": "EXTERNAL",
+							"Origin": {
+								"Type": "SPARK"
+							},
+							"StorageDescriptor": {
+								"Columns": [
+									{
+										"Name": "LegalEntityId",
+										"Description": "The unique identifier of a Legal Entity.",
+										"OriginDataTypeName": {
+											"TypeName": "integer",
+											"IsComplexType": false,
+											"IsNullable": false,
+											"Properties": {
+												"HIVE_TYPE_STRING": "integer"
+											}
+										},
+										"BaseAttributeReference": {
+											"Entity": "LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric",
+											"Name": "LegalEntityId"
+										}
+									},
+									{
+										"Name": "BusinessMetricId",
+										"Description": "The unique identifier of a business metric.",
+										"OriginDataTypeName": {
+											"TypeName": "integer",
+											"IsComplexType": false,
+											"IsNullable": false,
+											"Properties": {
+												"HIVE_TYPE_STRING": "integer"
+											}
+										},
+										"BaseAttributeReference": {
+											"Entity": "LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric",
+											"Name": "BusinessMetricId"
+										}
+									},
+									{
+										"Name": "PeriodStartDate",
+										"Description": "The period start date for which the associated metric is calculated.",
+										"OriginDataTypeName": {
+											"TypeName": "date",
+											"IsComplexType": false,
+											"IsNullable": false,
+											"Properties": {
+												"DateFormat": "YYYY-MM-DD",
+												"HIVE_TYPE_STRING": "date"
+											}
+										},
+										"BaseAttributeReference": {
+											"Entity": "LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric",
+											"Name": "PeriodStartDate"
+										}
+									},
+									{
+										"Name": "PeriodEndDate",
+										"Description": "The period end date for which the associated metric is calculated.",
+										"OriginDataTypeName": {
+											"TypeName": "date",
+											"IsComplexType": false,
+											"IsNullable": false,
+											"Properties": {
+												"DateFormat": "YYYY-MM-DD",
+												"HIVE_TYPE_STRING": "date"
+											}
+										},
+										"BaseAttributeReference": {
+											"Entity": "LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric",
+											"Name": "PeriodEndDate"
+										}
+									},
+									{
+										"Name": "LegalEntityBusinessMetricTargetValue",
+										"Description": "The target value of the legal entity business metric for the indicated period.",
+										"OriginDataTypeName": {
+											"TypeName": "decimal",
+											"IsComplexType": false,
+											"IsNullable": true,
+											"Precision": 18,
+											"Scale": 2,
+											"Properties": {
+												"HIVE_TYPE_STRING": "decimal"
+											}
+										},
+										"BaseAttributeReference": {
+											"Entity": "LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric",
+											"Name": "LegalEntityBusinessMetricTargetValue"
+										}
+									},
+									{
+										"Name": "LegalEntityBusinessMetricValue",
+										"Description": "The value of the legal entity business metric calculated for the indicated period.",
+										"OriginDataTypeName": {
+											"TypeName": "decimal",
+											"IsComplexType": false,
+											"IsNullable": true,
+											"Precision": 18,
+											"Scale": 2,
+											"Properties": {
+												"HIVE_TYPE_STRING": "decimal"
+											}
+										},
+										"BaseAttributeReference": {
+											"Entity": "LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric",
+											"Name": "LegalEntityBusinessMetricValue"
+										}
+									},
+									{
+										"Name": "LegalEntityBusinessMetricNote",
+										"Description": "A note, comment or additional information regarding the legal entity business metric.",
+										"OriginDataTypeName": {
+											"TypeName": "string",
+											"IsComplexType": false,
+											"IsNullable": true,
+											"Length": 1024,
+											"Properties": {
+												"HIVE_TYPE_STRING": "string"
+											}
+										},
+										"BaseAttributeReference": {
+											"Entity": "LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric",
+											"Name": "LegalEntityBusinessMetricNote"
+										}
+									},
+									{
+										"Name": "IsoCurrencyCode",
+										"Description": "The ISO 4217 currency code.",
+										"OriginDataTypeName": {
+											"TypeName": "string",
+											"IsComplexType": false,
+											"IsNullable": true,
+											"Length": 3,
+											"Properties": {
+												"HIVE_TYPE_STRING": "string"
+											}
+										},
+										"BaseAttributeReference": {
+											"Entity": "LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric",
+											"Name": "IsoCurrencyCode"
+										}
+									},
+									{
+										"Name": "KeyPerformanceIndicator",
+										"Description": "Indicates whether the metric is considered to be a key performance indicator during the given timeframe.",
+										"OriginDataTypeName": {
+											"TypeName": "string",
+											"IsComplexType": false,
+											"IsNullable": true,
+											"Length": 1024,
+											"Properties": {
+												"HIVE_TYPE_STRING": "string"
+											}
+										},
+										"BaseAttributeReference": {
+											"Entity": "LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric",
+											"Name": "KeyPerformanceIndicator"
+										}
+									}
+								],
+								"Format": {
+									"InputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+									"OutputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+									"FormatType": "parquet",
+									"SerializeLib": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+									"Properties": {
+										"path": "abfss://dlsfffpocfs1@fffxjv3mboryscbgpoc.dfs.core.windows.net/LakeDatabase1/LegalEntityBusinessMetric",
+										"FormatTypeSetToDatabaseDefault": true
+									}
+								},
+								"Source": {
+									"Provider": "ADLS",
+									"Location": "abfss://dlsfffpocfs1@fffxjv3mboryscbgpoc.dfs.core.windows.net/LakeDatabase1/LegalEntityBusinessMetric",
+									"Properties": {
+										"LinkedServiceName": "fffxjv3mboryscbgpocws1-WorkspaceDefaultStorage",
+										"LocationSetToDatabaseDefault": true
+									}
+								},
+								"Properties": {
+									"textinputformat.record.delimiter": ",",
+									"compression": "{\"type\":\"None\",\"level\":\"optimal\"}",
+									"derivedModelAttributeInfo": "{\"attributeReferences\":{\"LegalEntityId\":{\"entity\":\"LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric\",\"name\":\"LegalEntityId\"},\"BusinessMetricId\":{\"entity\":\"LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric\",\"name\":\"BusinessMetricId\"},\"PeriodStartDate\":{\"entity\":\"LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric\",\"name\":\"PeriodStartDate\"},\"PeriodEndDate\":{\"entity\":\"LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric\",\"name\":\"PeriodEndDate\"},\"LegalEntityBusinessMetricTargetValue\":{\"entity\":\"LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric\",\"name\":\"LegalEntityBusinessMetricTargetValue\"},\"LegalEntityBusinessMetricValue\":{\"entity\":\"LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric\",\"name\":\"LegalEntityBusinessMetricValue\"},\"LegalEntityBusinessMetricNote\":{\"entity\":\"LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric\",\"name\":\"LegalEntityBusinessMetricNote\"},\"IsoCurrencyCode\":{\"entity\":\"LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric\",\"name\":\"IsoCurrencyCode\"},\"KeyPerformanceIndicator\":{\"entity\":\"LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric\",\"name\":\"KeyPerformanceIndicator\"}}}"
+								},
+								"Compressed": false,
+								"IsStoredAsSubdirectories": false
+							},
+							"Properties": {
+								"DerivedModelEntityInfo": "{\"entityDirectives\":{\"baseEntityReference\":{\"name\":\"LegalEntityBusinessMetric\",\"path\":\"LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric\"},\"description\":\"The associated Business Metric reported by the Legal Entity for the indicated period.\",\"primaryKey\":[\"LegalEntityId\",\"BusinessMetricId\",\"PeriodStartDate\",\"PeriodEndDate\"],\"projectionInfo\":{\"attributes\":[{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric\",\"name\":\"LegalEntityId\"},\"dataType\":\"integer\",\"description\":\"The unique identifier of a Legal Entity.\",\"isNullable\":false,\"name\":\"LegalEntityId\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric\",\"name\":\"BusinessMetricId\"},\"dataType\":\"integer\",\"description\":\"The unique identifier of a business metric.\",\"isNullable\":false,\"name\":\"BusinessMetricId\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric\",\"name\":\"PeriodStartDate\"},\"dataType\":\"date\",\"dateFormat\":\"YYYY-MM-DD\",\"description\":\"The period start date for which the associated metric is calculated.\",\"isNullable\":false,\"name\":\"PeriodStartDate\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric\",\"name\":\"PeriodEndDate\"},\"dataType\":\"date\",\"dateFormat\":\"YYYY-MM-DD\",\"description\":\"The period end date for which the associated metric is calculated.\",\"isNullable\":false,\"name\":\"PeriodEndDate\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric\",\"name\":\"LegalEntityBusinessMetricTargetValue\"},\"dataType\":\"decimal\",\"dataTypeLength\":18,\"description\":\"The target value of the legal entity business metric for the indicated period.\",\"isNullable\":true,\"scale\":2,\"name\":\"LegalEntityBusinessMetricTargetValue\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric\",\"name\":\"LegalEntityBusinessMetricValue\"},\"dataType\":\"decimal\",\"dataTypeLength\":18,\"description\":\"The value of the legal entity business metric calculated for the indicated period.\",\"isNullable\":true,\"scale\":2,\"name\":\"LegalEntityBusinessMetricValue\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric\",\"name\":\"LegalEntityBusinessMetricNote\"},\"dataType\":\"string\",\"dataTypeLength\":1024,\"description\":\"A note, comment or additional information regarding the legal entity business metric.\",\"isNullable\":true,\"name\":\"LegalEntityBusinessMetricNote\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric\",\"name\":\"IsoCurrencyCode\"},\"dataType\":\"string\",\"dataTypeLength\":3,\"description\":\"The ISO 4217 currency code.\",\"isNullable\":true,\"name\":\"IsoCurrencyCode\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric\",\"name\":\"KeyPerformanceIndicator\"},\"dataType\":\"string\",\"dataTypeLength\":1024,\"description\":\"Indicates whether the metric is considered to be a key performance indicator during the given timeframe.\",\"isNullable\":true,\"name\":\"KeyPerformanceIndicator\"}]}}}",
+								"Description": "The associated Business Metric reported by the Legal Entity for the indicated period.",
+								"DisplayFolderInfo": "{\"name\":\"Business Metrics\",\"colorCode\":\"#00A2AD\"}",
+								"PrimaryKeys": "LegalEntityId,BusinessMetricId,PeriodStartDate,PeriodEndDate",
+								"spark.sql.sources.provider": "parquet"
+							},
+							"Retention": 0,
+							"Temporary": false,
+							"IsRewriteEnabled": false
+						},
+						"Source": {
+							"Type": "SPARK"
+						}
+					},
+					{
+						"ActionType": "CREATE",
+						"OldEntity": null,
+						"NewEntity": {
+							"Name": "PartyBusinessMetric",
+							"EntityType": "TABLE",
+							"Namespace": {
+								"DatabaseName": "LakeDatabase1"
+							},
+							"Description": "The associated Business Metric reported by the Party for the indicated period.",
+							"TableType": "EXTERNAL",
+							"Origin": {
+								"Type": "SPARK"
+							},
+							"StorageDescriptor": {
+								"Columns": [
+									{
+										"Name": "PartyId",
+										"Description": "The unique identifier of a Party.",
+										"OriginDataTypeName": {
+											"TypeName": "long",
+											"IsComplexType": false,
+											"IsNullable": false,
+											"Properties": {
+												"HIVE_TYPE_STRING": "long"
+											}
+										},
+										"BaseAttributeReference": {
+											"Entity": "PartyBusinessMetric.cdm.json/PartyBusinessMetric",
+											"Name": "PartyId"
+										}
+									},
+									{
+										"Name": "BusinessMetricId",
+										"Description": "The unique identifier of a business metric.",
+										"OriginDataTypeName": {
+											"TypeName": "integer",
+											"IsComplexType": false,
+											"IsNullable": false,
+											"Properties": {
+												"HIVE_TYPE_STRING": "integer"
+											}
+										},
+										"BaseAttributeReference": {
+											"Entity": "PartyBusinessMetric.cdm.json/PartyBusinessMetric",
+											"Name": "BusinessMetricId"
+										}
+									},
+									{
+										"Name": "PeriodStartDate",
+										"Description": "The period start date for which the associated metric is calculated.",
+										"OriginDataTypeName": {
+											"TypeName": "date",
+											"IsComplexType": false,
+											"IsNullable": false,
+											"Properties": {
+												"DateFormat": "YYYY-MM-DD",
+												"HIVE_TYPE_STRING": "date"
+											}
+										},
+										"BaseAttributeReference": {
+											"Entity": "PartyBusinessMetric.cdm.json/PartyBusinessMetric",
+											"Name": "PeriodStartDate"
+										}
+									},
+									{
+										"Name": "PeriodEndDate",
+										"Description": "The period end date for which the associated metric is calculated.",
+										"OriginDataTypeName": {
+											"TypeName": "date",
+											"IsComplexType": false,
+											"IsNullable": false,
+											"Properties": {
+												"DateFormat": "YYYY-MM-DD",
+												"HIVE_TYPE_STRING": "date"
+											}
+										},
+										"BaseAttributeReference": {
+											"Entity": "PartyBusinessMetric.cdm.json/PartyBusinessMetric",
+											"Name": "PeriodEndDate"
+										}
+									},
+									{
+										"Name": "PartyBusinessMetricTargetValue",
+										"Description": "The target value of the party business metric for the indicated period.",
+										"OriginDataTypeName": {
+											"TypeName": "decimal",
+											"IsComplexType": false,
+											"IsNullable": true,
+											"Precision": 18,
+											"Scale": 2,
+											"Properties": {
+												"HIVE_TYPE_STRING": "decimal"
+											}
+										},
+										"BaseAttributeReference": {
+											"Entity": "PartyBusinessMetric.cdm.json/PartyBusinessMetric",
+											"Name": "PartyBusinessMetricTargetValue"
+										}
+									},
+									{
+										"Name": "PartyBusinessMetricValue",
+										"Description": "The value of the business metric calculated for the indicated period.",
+										"OriginDataTypeName": {
+											"TypeName": "decimal",
+											"IsComplexType": false,
+											"IsNullable": true,
+											"Precision": 18,
+											"Scale": 2,
+											"Properties": {
+												"HIVE_TYPE_STRING": "decimal"
+											}
+										},
+										"BaseAttributeReference": {
+											"Entity": "PartyBusinessMetric.cdm.json/PartyBusinessMetric",
+											"Name": "PartyBusinessMetricValue"
+										}
+									},
+									{
+										"Name": "PartyBusinessMetricNote",
+										"Description": "A note, comment or additional information regarding the party business metric.",
+										"OriginDataTypeName": {
+											"TypeName": "string",
+											"IsComplexType": false,
+											"IsNullable": true,
+											"Length": 1024,
+											"Properties": {
+												"HIVE_TYPE_STRING": "string"
+											}
+										},
+										"BaseAttributeReference": {
+											"Entity": "PartyBusinessMetric.cdm.json/PartyBusinessMetric",
+											"Name": "PartyBusinessMetricNote"
+										}
+									},
+									{
+										"Name": "IsoCurrencyCode",
+										"Description": "The ISO 4217 currency code.",
+										"OriginDataTypeName": {
+											"TypeName": "string",
+											"IsComplexType": false,
+											"IsNullable": true,
+											"Length": 3,
+											"Properties": {
+												"HIVE_TYPE_STRING": "string"
+											}
+										},
+										"BaseAttributeReference": {
+											"Entity": "PartyBusinessMetric.cdm.json/PartyBusinessMetric",
+											"Name": "IsoCurrencyCode"
+										}
+									},
+									{
+										"Name": "KeyPerformanceIndicator",
+										"Description": "Indicates whether the metric is considered to be a key performance indicator during the given timeframe.",
+										"OriginDataTypeName": {
+											"TypeName": "string",
+											"IsComplexType": false,
+											"IsNullable": true,
+											"Length": 1024,
+											"Properties": {
+												"HIVE_TYPE_STRING": "string"
+											}
+										},
+										"BaseAttributeReference": {
+											"Entity": "PartyBusinessMetric.cdm.json/PartyBusinessMetric",
+											"Name": "KeyPerformanceIndicator"
+										}
+									}
+								],
+								"Format": {
+									"InputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+									"OutputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+									"FormatType": "parquet",
+									"SerializeLib": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+									"Properties": {
+										"path": "abfss://dlsfffpocfs1@fffxjv3mboryscbgpoc.dfs.core.windows.net/LakeDatabase1/PartyBusinessMetric",
+										"FormatTypeSetToDatabaseDefault": true
+									}
+								},
+								"Source": {
+									"Provider": "ADLS",
+									"Location": "abfss://dlsfffpocfs1@fffxjv3mboryscbgpoc.dfs.core.windows.net/LakeDatabase1/PartyBusinessMetric",
+									"Properties": {
+										"LinkedServiceName": "fffxjv3mboryscbgpocws1-WorkspaceDefaultStorage",
+										"LocationSetToDatabaseDefault": true
+									}
+								},
+								"Properties": {
+									"textinputformat.record.delimiter": ",",
+									"compression": "{\"type\":\"None\",\"level\":\"optimal\"}",
+									"derivedModelAttributeInfo": "{\"attributeReferences\":{\"PartyId\":{\"entity\":\"PartyBusinessMetric.cdm.json/PartyBusinessMetric\",\"name\":\"PartyId\"},\"BusinessMetricId\":{\"entity\":\"PartyBusinessMetric.cdm.json/PartyBusinessMetric\",\"name\":\"BusinessMetricId\"},\"PeriodStartDate\":{\"entity\":\"PartyBusinessMetric.cdm.json/PartyBusinessMetric\",\"name\":\"PeriodStartDate\"},\"PeriodEndDate\":{\"entity\":\"PartyBusinessMetric.cdm.json/PartyBusinessMetric\",\"name\":\"PeriodEndDate\"},\"PartyBusinessMetricTargetValue\":{\"entity\":\"PartyBusinessMetric.cdm.json/PartyBusinessMetric\",\"name\":\"PartyBusinessMetricTargetValue\"},\"PartyBusinessMetricValue\":{\"entity\":\"PartyBusinessMetric.cdm.json/PartyBusinessMetric\",\"name\":\"PartyBusinessMetricValue\"},\"PartyBusinessMetricNote\":{\"entity\":\"PartyBusinessMetric.cdm.json/PartyBusinessMetric\",\"name\":\"PartyBusinessMetricNote\"},\"IsoCurrencyCode\":{\"entity\":\"PartyBusinessMetric.cdm.json/PartyBusinessMetric\",\"name\":\"IsoCurrencyCode\"},\"KeyPerformanceIndicator\":{\"entity\":\"PartyBusinessMetric.cdm.json/PartyBusinessMetric\",\"name\":\"KeyPerformanceIndicator\"}}}"
+								},
+								"Compressed": false,
+								"IsStoredAsSubdirectories": false
+							},
+							"Properties": {
+								"DerivedModelEntityInfo": "{\"entityDirectives\":{\"baseEntityReference\":{\"name\":\"PartyBusinessMetric\",\"path\":\"PartyBusinessMetric.cdm.json/PartyBusinessMetric\"},\"description\":\"The associated Business Metric reported by the Party for the indicated period.\",\"primaryKey\":[\"PartyId\",\"BusinessMetricId\",\"PeriodStartDate\",\"PeriodEndDate\"],\"projectionInfo\":{\"attributes\":[{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"PartyBusinessMetric.cdm.json/PartyBusinessMetric\",\"name\":\"PartyId\"},\"dataType\":\"long\",\"description\":\"The unique identifier of a Party.\",\"isNullable\":false,\"name\":\"PartyId\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"PartyBusinessMetric.cdm.json/PartyBusinessMetric\",\"name\":\"BusinessMetricId\"},\"dataType\":\"integer\",\"description\":\"The unique identifier of a business metric.\",\"isNullable\":false,\"name\":\"BusinessMetricId\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"PartyBusinessMetric.cdm.json/PartyBusinessMetric\",\"name\":\"PeriodStartDate\"},\"dataType\":\"date\",\"dateFormat\":\"YYYY-MM-DD\",\"description\":\"The period start date for which the associated metric is calculated.\",\"isNullable\":false,\"name\":\"PeriodStartDate\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"PartyBusinessMetric.cdm.json/PartyBusinessMetric\",\"name\":\"PeriodEndDate\"},\"dataType\":\"date\",\"dateFormat\":\"YYYY-MM-DD\",\"description\":\"The period end date for which the associated metric is calculated.\",\"isNullable\":false,\"name\":\"PeriodEndDate\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"PartyBusinessMetric.cdm.json/PartyBusinessMetric\",\"name\":\"PartyBusinessMetricTargetValue\"},\"dataType\":\"decimal\",\"dataTypeLength\":18,\"description\":\"The target value of the party business metric for the indicated period.\",\"isNullable\":true,\"scale\":2,\"name\":\"PartyBusinessMetricTargetValue\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"PartyBusinessMetric.cdm.json/PartyBusinessMetric\",\"name\":\"PartyBusinessMetricValue\"},\"dataType\":\"decimal\",\"dataTypeLength\":18,\"description\":\"The value of the business metric calculated for the indicated period.\",\"isNullable\":true,\"scale\":2,\"name\":\"PartyBusinessMetricValue\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"PartyBusinessMetric.cdm.json/PartyBusinessMetric\",\"name\":\"PartyBusinessMetricNote\"},\"dataType\":\"string\",\"dataTypeLength\":1024,\"description\":\"A note, comment or additional information regarding the party business metric.\",\"isNullable\":true,\"name\":\"PartyBusinessMetricNote\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"PartyBusinessMetric.cdm.json/PartyBusinessMetric\",\"name\":\"IsoCurrencyCode\"},\"dataType\":\"string\",\"dataTypeLength\":3,\"description\":\"The ISO 4217 currency code.\",\"isNullable\":true,\"name\":\"IsoCurrencyCode\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"PartyBusinessMetric.cdm.json/PartyBusinessMetric\",\"name\":\"KeyPerformanceIndicator\"},\"dataType\":\"string\",\"dataTypeLength\":1024,\"description\":\"Indicates whether the metric is considered to be a key performance indicator during the given timeframe.\",\"isNullable\":true,\"name\":\"KeyPerformanceIndicator\"}]}}}",
+								"Description": "The associated Business Metric reported by the Party for the indicated period.",
+								"DisplayFolderInfo": "{\"name\":\"Business Metrics\",\"colorCode\":\"#00A2AD\"}",
+								"PrimaryKeys": "PartyId,BusinessMetricId,PeriodStartDate,PeriodEndDate",
+								"spark.sql.sources.provider": "parquet"
+							},
+							"Retention": 0,
+							"Temporary": false,
+							"IsRewriteEnabled": false
+						},
+						"Source": {
+							"Type": "SPARK"
+						}
+					},
+					{
+						"ActionType": "CREATE",
+						"OldEntity": null,
+						"NewEntity": {
+							"Name": "Table_1",
+							"EntityType": "TABLE",
+							"Namespace": {
+								"DatabaseName": "LakeDatabase1"
+							},
+							"Description": "",
+							"TableType": "EXTERNAL",
+							"Origin": {
+								"Type": "SPARK"
+							},
+							"StorageDescriptor": {
+								"Columns": [
+									{
+										"Name": "Column_1",
+										"OriginDataTypeName": {
+											"TypeName": "string",
+											"IsComplexType": false,
+											"IsNullable": true,
+											"Length": 256,
+											"Properties": {
+												"HIVE_TYPE_STRING": "string"
+											}
+										}
+									}
+								],
+								"Format": {
+									"InputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+									"OutputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+									"FormatType": "parquet",
+									"SerializeLib": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+									"Properties": {
+										"path": "abfss://dlsfffpocfs1@fffxjv3mboryscbgpoc.dfs.core.windows.net/LakeDatabase1/Table_1",
+										"FormatTypeSetToDatabaseDefault": true
+									}
+								},
+								"Source": {
+									"Provider": "ADLS",
+									"Location": "abfss://dlsfffpocfs1@fffxjv3mboryscbgpoc.dfs.core.windows.net/LakeDatabase1/Table_1",
+									"Properties": {
+										"LinkedServiceName": "fffxjv3mboryscbgpocws1-WorkspaceDefaultStorage",
+										"LocationSetToDatabaseDefault": true
+									}
+								},
+								"Properties": {
+									"textinputformat.record.delimiter": ",",
+									"compression": "{\"type\":\"None\",\"level\":\"optimal\"}",
+									"derivedModelAttributeInfo": "{\"attributeReferences\":{}}"
+								},
+								"Compressed": false,
+								"IsStoredAsSubdirectories": false
+							},
+							"Properties": {
+								"Description": "",
+								"DisplayFolderInfo": "{\"name\":\"Others\",\"colorCode\":\"\"}",
+								"PrimaryKeys": "",
+								"spark.sql.sources.provider": "parquet"
+							},
+							"Retention": 0,
+							"Temporary": false,
+							"IsRewriteEnabled": false
+						},
+						"Source": {
+							"Type": "SPARK"
+						}
+					},
+					{
+						"ActionType": "CREATE",
+						"OldEntity": null,
+						"NewEntity": {
+							"Name": "relationship-oxgaujdjjk",
+							"EntityType": "RELATIONSHIP",
+							"Namespace": {
+								"DatabaseName": "LakeDatabase1"
+							},
+							"Origin": {
+								"Type": "SPARK"
+							},
+							"FromTableName": "BusinessMetricType",
+							"ToTableName": "BusinessMetric",
+							"ColumnRelationshipInformations": [
+								{
+									"FromColumnName": "BusinessMetricTypeId",
+									"ToColumnName": "BusinessMetricTypeId"
+								}
+							],
+							"RelationshipType": 0,
+							"Properties": {
+								"DerivedModelRelationshipInfo": "{\"baseRelationship\":{\"fromEntity\":\"BusinessMetricType.cdm.json/BusinessMetricType\",\"toEntity\":\"BusinessMetric.cdm.json/BusinessMetric\",\"joinPairs\":[{\"fromAttribute\":\"BusinessMetricTypeId\",\"toAttribute\":\"BusinessMetricTypeId\"}]}}"
+							}
+						},
+						"Source": {
+							"Type": "SPARK"
+						}
+					},
+					{
+						"ActionType": "CREATE",
+						"OldEntity": null,
+						"NewEntity": {
+							"Name": "relationship-pecjulxwsy",
+							"EntityType": "RELATIONSHIP",
+							"Namespace": {
+								"DatabaseName": "LakeDatabase1"
+							},
+							"Origin": {
+								"Type": "SPARK"
+							},
+							"FromTableName": "BusinessMetric",
+							"ToTableName": "PartyBusinessMetric",
+							"ColumnRelationshipInformations": [
+								{
+									"FromColumnName": "BusinessMetricId",
+									"ToColumnName": "BusinessMetricId"
+								}
+							],
+							"RelationshipType": 0,
+							"Properties": {
+								"DerivedModelRelationshipInfo": "{\"baseRelationship\":{\"fromEntity\":\"BusinessMetric.cdm.json/BusinessMetric\",\"toEntity\":\"PartyBusinessMetric.cdm.json/PartyBusinessMetric\",\"joinPairs\":[{\"fromAttribute\":\"BusinessMetricId\",\"toAttribute\":\"BusinessMetricId\"}]}}"
+							}
+						},
+						"Source": {
+							"Type": "SPARK"
+						}
+					},
+					{
+						"ActionType": "CREATE",
+						"OldEntity": null,
+						"NewEntity": {
+							"Name": "relationship-xyloxsrilh",
+							"EntityType": "RELATIONSHIP",
+							"Namespace": {
+								"DatabaseName": "LakeDatabase1"
+							},
+							"Origin": {
+								"Type": "SPARK"
+							},
+							"FromTableName": "BusinessMetric",
+							"ToTableName": "LegalEntityBusinessMetric",
+							"ColumnRelationshipInformations": [
+								{
+									"FromColumnName": "BusinessMetricId",
+									"ToColumnName": "BusinessMetricId"
+								}
+							],
+							"RelationshipType": 0,
+							"Properties": {
+								"DerivedModelRelationshipInfo": "{\"baseRelationship\":{\"fromEntity\":\"BusinessMetric.cdm.json/BusinessMetric\",\"toEntity\":\"LegalEntityBusinessMetric.cdm.json/LegalEntityBusinessMetric\",\"joinPairs\":[{\"fromAttribute\":\"BusinessMetricId\",\"toAttribute\":\"BusinessMetricId\"}]}}"
+							}
+						},
+						"Source": {
+							"Type": "SPARK"
+						}
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/ws1sparkpool1')]",
 			"type": "Microsoft.Synapse/workspaces/bigDataPools",
 			"apiVersion": "2019-06-01-preview",
@@ -2250,61 +3204,6 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {},
 			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/SQL script 1')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"content": {
-					"query": "",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "default",
-						"poolName": "Built-in"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/Credential1')]",
-			"type": "Microsoft.Synapse/workspaces/credentials",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"type": "ManagedIdentity",
-				"typeProperties": {
-					"resourceId": "/subscriptions/241719b7-f326-42c8-87a0-fb0182d3a3c7/resourceGroups/testspark/providers/Microsoft.ManagedIdentity/userAssignedIdentities/llkmanagedidentity01"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/AzureDatabricks1')]",
-			"type": "Microsoft.Synapse/workspaces/linkedServices",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": [],
-				"type": "AzureDatabricks",
-				"typeProperties": {
-					"domain": "https://adb-2080334085598083.3.azuredatabricks.net",
-					"authentication": "MSI",
-					"workspaceResourceId": "/subscriptions/241719b7-f326-42c8-87a0-fb0182d3a3c7/resourceGroups/rgllkdatabricks/providers/Microsoft.Databricks/workspaces/wsnewdatabricks",
-					"existingClusterId": "0518-191436-v0j1bjtf"
-				},
-				"connectVia": {
-					"referenceName": "AutoResolveIntegrationRuntime",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/credentials/Credential1')]",
-				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
-			]
 		}
 	]
 }
