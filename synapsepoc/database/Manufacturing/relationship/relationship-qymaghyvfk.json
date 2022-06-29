@@ -1,0 +1,26 @@
+{
+	"name": "relationship-qymaghyvfk",
+	"properties": {
+		"Name": "relationship-qymaghyvfk",
+		"EntityType": "RELATIONSHIP",
+		"Namespace": {
+			"DatabaseName": "Manufacturing"
+		},
+		"Origin": {
+			"Type": "SPARK"
+		},
+		"FromTableName": "ManufacturingProduct",
+		"ToTableName": "Item",
+		"ColumnRelationshipInformations": [
+			{
+				"FromColumnName": "ProductId",
+				"ToColumnName": "ProductId"
+			}
+		],
+		"RelationshipType": 0,
+		"Properties": {
+			"DerivedModelRelationshipInfo": "{\"baseRelationship\":{\"fromEntity\":\"ManufacturingProduct.cdm.json/ManufacturingProduct\",\"toEntity\":\"Item.cdm.json/Item\",\"joinPairs\":[{\"fromAttribute\":\"ProductId\",\"toAttribute\":\"ProductId\"}]}}"
+		}
+	},
+	"type": "RELATIONSHIP"
+}
