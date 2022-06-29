@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 4",
+	"properties": {
+		"content": {
+			"query": "SELECT TOP (100) [dataType]\n,[dataSubtype]\n,[dateTime]\n,[category]\n,[subcategory]\n,[status]\n,[address]\n,[latitude]\n,[longitude]\n,[source]\n,[extendedProperties]\n FROM [default].[dbo].[city_safety_sanfrancisco]",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "default",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
